@@ -326,7 +326,7 @@ const LEVEL_ICON = { A1: "book", A2: "grad", B1: "rocket", B2: "crown" };
 function readDB() { try { return JSON.parse(localStorage.getItem("rt_db")) || { users: {} }; } catch (e) { return { users: {} }; } }
 function writeDB(d) {
   localStorage.setItem("rt_db", JSON.stringify(d));
-  if (tg && tg.CloudStorage) tg.CloudStorage.setItem("rt_db", JSON.stringify(d), function () {});
+  try { if (tg && tg.CloudStorage) tg.CloudStorage.setItem("rt_db", JSON.stringify(d), function () {}); } catch (e) {}
 }
 function hash(s) { let h = 9; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 387420489); return (h >>> 0).toString(36); }
 
@@ -335,9 +335,11 @@ let me = null;
 let quiz = null;
 const app = document.getElementById("app");
 
-if (tg && tg.CloudStorage) tg.CloudStorage.getItem("rt_db", function (err, val) {
-  if (!err && val && !localStorage.getItem("rt_db")) { localStorage.setItem("rt_db", val); db = readDB(); }
-});
+try {
+  if (tg && tg.CloudStorage) tg.CloudStorage.getItem("rt_db", function (err, val) {
+    if (!err && val && !localStorage.getItem("rt_db")) { localStorage.setItem("rt_db", val); db = readDB(); }
+  });
+} catch (e) {}
 
 /* Yordamchilar */
 function user() { return db.users[me]; }
