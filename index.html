@@ -5,12 +5,463 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 <title>Rus tili PRO — Mini App</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link rel="stylesheet" href="style.css">
+<style>
+:root{
+  --bg:#0d0d18; --card:rgba(255,255,255,.06); --line:rgba(255,255,255,.1);
+  --txt:#f1f0fa; --mut:#9b98b8; --acc:#8e7bff; --acc2:#22d3ee;
+  --ok:#34d399; --bad:#f87171;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
+body::before,body::after{content:"";position:fixed;z-index:-2;width:65vmax;height:65vmax;border-radius:50%;filter:blur(100px);opacity:.14;animation:blob 24s ease-in-out infinite alternate}
+body::before{background:#6d5dfc;top:-28vmax;left:-22vmax}
+body::after{background:#0ea5e9;bottom:-28vmax;right:-22vmax;animation-delay:-12s}
+@keyframes blob{to{transform:translate(7vmax,5vmax) scale(1.18)}}
+#bg{position:fixed;inset:0;z-index:-1}
+#app{max-width:520px;margin:0 auto;padding:18px 16px 48px}
+.glass{background:var(--card);border:1px solid var(--line);border-radius:18px;backdrop-filter:blur(14px)}
+.center{display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:8vh;gap:14px}
+.logo{width:86px;height:86px;border-radius:28px;background:linear-gradient(135deg,#8e7bff,#22d3ee);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 40px rgba(142,123,255,.45);animation:floaty 3.5s ease-in-out infinite}
+.logo svg{width:44px;height:44px;color:#fff}
+.logo.sad{background:linear-gradient(135deg,#475069,#232a3d);box-shadow:none}
+@keyframes floaty{50%{transform:translateY(-8px)}}
+.title{font-size:30px}
+.grad-txt{background:linear-gradient(90deg,#8e7bff,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mut)}
+.form{width:100%;padding:18px;display:flex;flex-direction:column;gap:11px}
+.tabs{display:flex;background:rgba(0,0,0,.28);border-radius:12px;padding:4px}
+.tab{flex:1;padding:9px;border:0;border-radius:9px;background:none;color:var(--mut);font-weight:600;cursor:pointer;transition:.25s}
+.tab.on{background:var(--acc);color:#fff}
+.inp{padding:13px 15px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.28);color:var(--txt);font-size:15px;outline:none;transition:.25s}
+.inp:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(142,123,255,.2)}
+.btn{display:block;width:100%;padding:13px;margin-top:10px;border:1px solid var(--line);border-radius:13px;background:var(--card);color:var(--txt);font-size:15px;font-weight:700;cursor:pointer;transition:transform .15s}
+.btn:active{transform:scale(.97)}
+.btn.grad{background:linear-gradient(90deg,#8e7bff,#22d3ee);border:0;color:#fff;box-shadow:0 6px 24px rgba(142,123,255,.4)}
+.head{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:16px}
+.ava{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#8e7bff,#22d3ee);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ava svg{width:22px;height:22px;color:#fff}
+.xp{margin-left:auto;display:flex;align-items:center;gap:5px;color:#fbbf24;font-size:14px}
+.xp svg{width:17px;height:17px}
+.ghost{border:0;background:none;color:var(--mut);cursor:pointer;padding:6px}
+.ghost svg{width:21px;height:21px}
+.sec{margin:6px 2px 12px;font-size:19px}
+.lvl,.lesson{display:flex;align-items:center;gap:14px;padding:15px;margin-bottom:12px;cursor:pointer;position:relative;transition:transform .18s,border-color .18s;animation:fadeUp .4s ease both}
+.lvl:active,.lesson:active{transform:scale(.98)}
+.lvl:hover,.lesson:hover{border-color:var(--acc)}
+.lvl-ic{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,rgba(142,123,255,.25),rgba(34,211,238,.25));display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--acc2)}
+.lvl-ic svg{width:25px;height:25px}
+.lvl-body{flex:1;min-width:0}
+.lvl-body small{display:block;color:var(--mut);margin-top:2px;font-size:12.5px}
+.num{width:36px;height:36px;border-radius:50%;background:rgba(142,123,255,.18);color:var(--acc);display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0}
+.num.done{background:var(--ok);color:#04291c}
+.locked{opacity:.45;filter:grayscale(.6)}
+.lock{position:absolute;right:15px;color:var(--mut)}
+.lock svg{width:19px;height:19px}
+.bar{height:7px;border-radius:5px;background:rgba(0,0,0,.35);margin:7px 0 4px;overflow:hidden}
+.fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#8e7bff,#22d3ee);transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.mut{color:var(--mut)}
+.foot{text-align:center;color:var(--mut);font-size:12.5px;margin-top:18px}
+.qcard{padding:22px 18px;margin-bottom:14px;animation:fadeUp .35s ease both}
+.qcard h3{font-size:18px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 16px;margin-bottom:10px;font-size:15px;color:var(--txt);cursor:pointer;transition:.2s;animation:fadeUp .4s ease both}
+.opt:disabled{cursor:default}
+.opt.ok{background:rgba(52,211,153,.2);border-color:var(--ok)}
+.opt.bad{background:rgba(248,113,113,.18);border-color:var(--bad)}
+.izoh{padding:13px 15px;margin:4px 0 10px;color:#cfcbe8;font-size:14px;line-height:1.5}
+.pct{font-size:56px;font-weight:900}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.fade{animation:fadeUp .35s ease both}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.shake{animation:shake .4s ease}
+@keyframes pop{50%{transform:scale(1.05)}}
+.pop{animation:pop .35s ease}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#232136;border:1px solid var(--line);color:var(--txt);padding:11px 18px;border-radius:13px;z-index:99;animation:fadeUp .3s ease both;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:88vw;text-align:center}
+.confetti{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:98;animation:confetti 2.6s linear forwards}
+@keyframes confetti{to{transform:translateY(108vh) rotate(720deg)}}
+</style>
 </head>
 <body>
 <canvas id="bg"></canvas>
 <div id="app"></div>
-<script src="data.js"></script>
-<script src="app.js"></script>
+<script>
+"use strict";
+// Xato bo'lsa ekranda ko'rsatadi (telefonda ham ko'rinadi)
+window.addEventListener("error", function (e) { var a = document.getElementById("app"); if (a) a.innerHTML = '<div style="margin:40px 16px;padding:16px;border:1px solid #f87171;border-radius:14px;color:#f87171">⚠️ Xato: ' + e.message + '</div>'; });
+
+/* ===== MA'LUMOTLAR ===== */
+const PASS = 70;
+const LEVELS = ["A1", "A2", "B1", "B2"];
+const DATA = {
+  A1: {
+    nom: "A1 — Boshlang'ich",
+    tavsif: "Salomlashish, oila, raqamlar, kundalik so'zlar",
+    darslar: [
+      { nom: "👋 Salomlashish", savollar: [
+        { s: "«Привет» nimani bildiradi?", v: ["Xayr", "Salom", "Rahmat", "Iltimos"], t: 1, i: "Привет — do'stona salom. Rasmiysi: Здравствуйте." },
+        { s: "«Доброе утро» nimani bildiradi?", v: ["Xayrli tun", "Xayrli kech", "Xayrli tong", "Xayrli kun"], t: 2, i: "Утро — tong. Kechqurun: Добрый вечер." },
+        { s: "«Пока» qachon aytiladi?", v: ["Uchrashganda", "Xayrlashganda", "Ovqatdan oldin", "Uxlashdan oldin"], t: 1, i: "Пока — do'stona xayrlashuv. Rasmiysi: До свидания." },
+        { s: "«Спасибо» nimani bildiradi?", v: ["Iltimos", "Kechirasiz", "Rahmat", "Marhamat"], t: 2, i: "Спасибо — rahmat. Javobi: Пожалуйста." },
+        { s: "«Извините» nimani bildiradi?", v: ["Kechirasiz", "Rahmat", "Salom", "Mayli"], t: 0, i: "Извините — kechirasiz. Murojaat qilishda ham ishlatiladi." },
+      ]},
+      { nom: "🤝 Tanishish", savollar: [
+        { s: "«Как тебя зовут?» nimani bildiradi?", v: ["Qayerdansan?", "Isming nima?", "Necha yoshdasan?", "Qalaysan?"], t: 1, i: "Звать — chaqirmoq. Javob: Меня зовут..." },
+        { s: "«Меня зовут Азиз» qanday tarjima qilinadi?", v: ["Men Azizni chaqiryapman", "Mening ismim Aziz", "Aziz keldi", "Men Azizman edim"], t: 1, i: "So'zma-so'z: «meni Aziz deb chaqirishadi»." },
+        { s: "«Очень приятно» qachon aytiladi?", v: ["Xayrlashganda", "Tanishganda", "Ovqatdan keyin", "Uxlashdan oldin"], t: 1, i: "Tanishgandan keyin: «tanishganimdan xursandman»." },
+        { s: "«Откуда ты?» nimani bildiradi?", v: ["Qayoqqa ketyapsan?", "Qayerdansan?", "Kim bilan?", "Qachon kelding?"], t: 1, i: "Откуда — qayerdan. Javob: Я из Узбекистана." },
+        { s: "«Мне двадцать лет» nimani bildiradi?", v: ["Soat yigirma", "Men 20 yoshdaman", "20 ta kitobim bor", "20-yanvar"], t: 1, i: "Yosh дательный kelishigida aytiladi: Мне ... лет." },
+      ]},
+      { nom: "👨‍👩‍👧 Oila", savollar: [
+        { s: "«Мама» nimani bildiradi?", v: ["Opa", "Ona", "Xola", "Buvi"], t: 1, i: "Мама — ona. Rasmiysi: мать." },
+        { s: "«Брат» nimani bildiradi?", v: ["Do'st", "Aka yoki uka", "Ota", "Qo'shni"], t: 1, i: "Брат — aka ham, uka ham. Katta: старший брат." },
+        { s: "«Семья» nimani bildiradi?", v: ["Oila", "Do'stlar", "Yetti", "Urug'"], t: 0, i: "Семья — oila. Talaffuzi: «sim'ya»." },
+        { s: "«Дочь» nimani bildiradi?", v: ["O'g'il", "Qiz (farzand)", "Nabira", "Singil"], t: 1, i: "Дочь — qiz farzand. O'g'il: сын." },
+        { s: "«Дедушка» nimani bildiradi?", v: ["Amaki", "Buva", "Ota", "Tog'a"], t: 1, i: "Дедушка — buva. Buvi: бабушка." },
+      ]},
+      { nom: "🔢 Raqamlar", savollar: [
+        { s: "«Три» qaysi raqam?", v: ["2", "3", "4", "5"], t: 1, i: "Один, два, три — 1, 2, 3." },
+        { s: "«Семь» qaysi raqam?", v: ["6", "8", "7", "9"], t: 2, i: "Семь — 7. Семья bilan adashtirmang!" },
+        { s: "«Десять» qaysi raqam?", v: ["12", "10", "100", "20"], t: 1, i: "Десять — 10. 100 esa: сто." },
+        { s: "«Сколько?» nimani bildiradi?", v: ["Qachon?", "Qancha?", "Qayerda?", "Kim?"], t: 1, i: "Сколько стоит? — qancha turadi?" },
+        { s: "«Пять» qaysi raqam?", v: ["5", "15", "50", "4"], t: 0, i: "Пять — 5. 15: пятнадцать, 50: пятьдесят." },
+      ]},
+      { nom: "🏠 Uy va narsalar", savollar: [
+        { s: "«Дом» nimani bildiradi?", v: ["Xona", "Uy", "Eshik", "Shahar"], t: 1, i: "Дом — uy. Я дома — men uydaman." },
+        { s: "«Стол» nimani bildiradi?", v: ["Stul", "Stol", "Shkaf", "Divan"], t: 1, i: "Стол — stol. Stul esa: стул." },
+        { s: "«Окно» nimani bildiradi?", v: ["Deraza", "Devor", "Shift", "Pol"], t: 0, i: "Окно — deraza. Talaffuzi: «akno»." },
+        { s: "«Дверь» nimani bildiradi?", v: ["Deraza", "Eshik", "Kalit", "Qulf"], t: 1, i: "Дверь — eshik. Откройте дверь — eshikni oching." },
+        { s: "«Комната» nimani bildiradi?", v: ["Oshxona", "Xona", "Hammom", "Balkon"], t: 1, i: "Комната — xona. Oshxona: кухня." },
+      ]},
+      { nom: "🍞 Ovqat va ichimlik", savollar: [
+        { s: "«Хлеб» nimani bildiradi?", v: ["Non", "Suv", "Go'sht", "Tuz"], t: 0, i: "Хлеб — non. Talaffuzi: «xlep»." },
+        { s: "«Вода» nimani bildiradi?", v: ["Suv", "Sut", "Sharbat", "Choy"], t: 0, i: "Вода — suv. Talaffuzi: «vada»." },
+        { s: "«Молоко» nimani bildiradi?", v: ["Qatiq", "Sut", "Smetana", "Ayron"], t: 1, i: "Молоко — sut. Talaffuzi: «malako»." },
+        { s: "«Чай» nimani bildiradi?", v: ["Qahva", "Choy", "Suv", "Kompot"], t: 1, i: "Чай — choy. Qahva: кофе." },
+        { s: "«Вкусно!» nimani bildiradi?", v: ["Achchiq!", "Mazali!", "Sovuq!", "Issiq!"], t: 1, i: "Вкусно — mazali. Очень вкусно! — juda mazali!" },
+      ]},
+      { nom: "🏃 Asosiy fe'llar", savollar: [
+        { s: "«Идти» nimani bildiradi?", v: ["O'tirmoq", "Yurmoq / bormoq", "Yugurmoq", "Turmoq"], t: 1, i: "Идти — piyoda bormoq. Я иду домой — uyga ketyapman." },
+        { s: "«Говорить» nimani bildiradi?", v: ["Eshitmoq", "Gapirmoq", "Ko'rmoq", "Yozmoq"], t: 1, i: "Говорить — gapirmoq. Я говорю по-русски." },
+        { s: "«Читать» nimani bildiradi?", v: ["Yozmoq", "O'qimoq", "Sanamoq", "Chizmoq"], t: 1, i: "Читать — o'qimoq. Читать книгу — kitob o'qimoq." },
+        { s: "«Я понимаю» nimani bildiradi?", v: ["Men bilaman", "Men tushunaman", "Men eslayman", "Men ko'raman"], t: 1, i: "Понимать — tushunmoq. Не понимаю — tushunmayapman." },
+        { s: "«Жить» nimani bildiradi?", v: ["Ishlamoq", "Yashamoq", "Uxlamoq", "Kutmoq"], t: 1, i: "Жить — yashamoq. Я живу в Ташкенте." },
+      ]},
+      { nom: "🎨 Ranglar va sifatlar", savollar: [
+        { s: "«Красный» qaysi rang?", v: ["Ko'k", "Qizil", "Yashil", "Sariq"], t: 1, i: "Красный — qizil. Красивый (chiroyli) bilan adashtirmang!" },
+        { s: "«Большой» nimani bildiradi?", v: ["Kichkina", "Katta", "Uzun", "Yangi"], t: 1, i: "Большой — katta. Kichkina: маленький." },
+        { s: "«Новый» nimani bildiradi?", v: ["Eski", "Yangi", "Toza", "Tez"], t: 1, i: "Новый — yangi. Eski: старый." },
+        { s: "«Хороший» nimani bildiradi?", v: ["Yomon", "Yaxshi", "Chiroyli", "Katta"], t: 1, i: "Хороший — yaxshi. Хорошо! — yaxshi! (ravish)." },
+        { s: "«Белый» qaysi rang?", v: ["Qora", "Oq", "Kulrang", "Jigarrang"], t: 1, i: "Белый — oq. Qora: чёрный." },
+      ]},
+    ],
+  },
+  A2: {
+    nom: "A2 — Davomiy",
+    tavsif: "Kundalik hayot, harakat, o'tgan zamon, shahar",
+    darslar: [
+      { nom: "⏰ Kundalik hayot", savollar: [
+        { s: "«Я встаю в семь часов» nimani bildiradi?", v: ["Soat 7 da uxlayman", "Soat 7 da turaman", "7 soat ishlayman", "7 ta soatim bor"], t: 1, i: "Вставать — turmoq (o'rindan). Вставаю emas — встаю!" },
+        { s: "«Обычно» nimani bildiradi?", v: ["Ba'zan", "Odatda", "Hech qachon", "Doim"], t: 1, i: "Обычно — odatda. Обычно я пью чай — odatda choy ichaman." },
+        { s: "«Каждый день» nimani bildiradi?", v: ["Har hafta", "Har kuni", "Butun kun", "Kunduzi"], t: 1, i: "Каждый — har bir. Каждый день — har kuni." },
+        { s: "«Отдыхать» nimani bildiradi?", v: ["Ishlamoq", "Dam olmoq", "Berib turmoq", "Nafas olmoq"], t: 1, i: "Отдыхать — dam olmoq. Отдых — dam olish." },
+      ]},
+      { nom: "🚶 Harakat fe'llari", savollar: [
+        { s: "«Идти» va «ходить» farqi nimada?", v: ["Farqi yo'q", "Идти — hozir bir yo'nalishda, ходить — takroriy", "Ходить — yugurish", "Идти — transportda"], t: 1, i: "Я иду в школу (hozir) / Я хожу в школу (har kuni)." },
+        { s: "«Ехать» nimani bildiradi?", v: ["Piyoda bormoq", "Transportda bormoq", "Uchmoq", "Suzmoq"], t: 1, i: "Ехать — mashina/avtobusda bormoq. Piyoda: идти." },
+        { s: "«Летать» nimani bildiradi?", v: ["Sakramoq", "Uchmoq", "Yugurmoq", "Suzmoq"], t: 1, i: "Летать — uchmoq. Самолёт летает — samolyot uchadi." },
+        { s: "«Я иду в кино» nimani bildiradi?", v: ["Kinoda edim", "Kinoga ketyapman", "Kino ko'raman", "Kinoni yoqtiraman"], t: 1, i: "Идти + в + joy — ...ga bormoq (hozir)." },
+      ]},
+      { nom: "⏳ O'tgan zamon", savollar: [
+        { s: "O'tgan zamonda ayol jinsida fe'l qanday tugaydi?", v: ["-л", "-ла", "-ло", "-ли"], t: 1, i: "Он читал, она читала, они читали." },
+        { s: "«Мы были дома» nimani bildiradi?", v: ["Biz uyga boramiz", "Biz uyda edik", "Bizning uyimiz bor", "Biz uydamiz"], t: 1, i: "Быть fe'lining o'tgan zamoni: был/была/были." },
+        { s: "«Вчера» nimani bildiradi?", v: ["Ertaga", "Kecha", "Bugun", "Kechqurun"], t: 1, i: "Вчера — kecha. Ertaga: завтра. Kechqurun: вечером." },
+        { s: "«Она сказала» nimani bildiradi?", v: ["U aytdi (ayol)", "U aytadi", "U eshitdi", "U so'radi"], t: 0, i: "Сказать — aytmoq (tugallangan). -ла — ayol jinsi." },
+      ]},
+      { nom: "🏙 Shahar va yo'l", savollar: [
+        { s: "«Как пройти к метро?» nimani bildiradi?", v: ["Metro qachon ochiladi?", "Metroga qanday boriladi?", "Metro ishlayaptimi?", "Metro qimmatmi?"], t: 1, i: "Yo'l so'rashning asosiy iborasi. Javob: идите прямо — to'g'ri yuring." },
+        { s: "«Направо» nimani bildiradi?", v: ["Chapga", "O'ngga", "To'g'riga", "Orqaga"], t: 1, i: "Направо — o'ngga, налево — chapga, прямо — to'g'riga." },
+        { s: "«Остановка» nimani bildiradi?", v: ["Bekat", "Do'kon", "Chorraha", "Ko'prik"], t: 0, i: "Остановка — bekat (остановиться — to'xtamoq so'zidan)." },
+        { s: "«Далеко» nimani bildiradi?", v: ["Yaqin", "Uzoq", "Tez", "Sekin"], t: 1, i: "Далеко — uzoq. Yaqin: близко." },
+      ]},
+      { nom: "🛍 Xarid qilish", savollar: [
+        { s: "«Сколько это стоит?» nimani bildiradi?", v: ["Bu nima?", "Bu qancha turadi?", "Buni kim oldi?", "Bu qayerdan?"], t: 1, i: "Стоить — turmoq (narx). Qisqasi: Сколько?" },
+        { s: "«Дорого» nimani bildiradi?", v: ["Arzon", "Qimmat", "Tekin", "Sifatli"], t: 1, i: "Дорого — qimmat. Arzon: дёшево." },
+        { s: "«Деньги» nimani bildiradi?", v: ["Kunlar", "Pul", "Hujjat", "Chegirma"], t: 1, i: "Деньги — pul (doim ko'plikda ishlatiladi)." },
+        { s: "«Магазин» nimani bildiradi?", v: ["Jurnal", "Do'kon", "Ombor", "Bozor"], t: 1, i: "Магазин — do'kon. Bozor: рынок / базар." },
+      ]},
+    ],
+  },
+  B1: {
+    nom: "B1 — O'rta daraja",
+    tavsif: "Aspekt, kelishiklar, fikr bildirish, iboralar",
+    darslar: [
+      { nom: "🔄 Fe'l turi (вид)", savollar: [
+        { s: "«Читать» va «прочитать» farqi nimada?", v: ["Zamon farqi", "Davomiy va tugallangan ish", "Jins farqi", "Farqi yo'q"], t: 1, i: "Читать — jarayon, прочитать — natija. Bu — вид (aspekt)." },
+        { s: "«Я сделал домашнее задание» — ish qanday?", v: ["Davom etyapti", "Tugallangan", "Boshlanmagan", "Takrorlanadi"], t: 1, i: "Сделать — совершенный вид: ish bitgan." },
+        { s: "Qaysi juftlik to'g'ri (несов. → сов.)?", v: ["писать → написать", "писать → пописать", "читать → зачитать", "делать → доделать"], t: 0, i: "Ko'p fe'llarda со-/на-/про- old qo'shimchasi tugallanganlik beradi." },
+        { s: "«Каждый день я делаю зарядку» — qaysi вид?", v: ["Совершенный", "Несовершенный", "Ikkalasi", "Aniqlab bo'lmaydi"], t: 1, i: "Takrorlanadigan ish — doim несовершенный вид." },
+      ]},
+      { nom: "📐 Kelishiklar amalda", savollar: [
+        { s: "Rus tilida nechta kelishik bor?", v: ["4", "5", "6", "7"], t: 2, i: "6 ta: им., род., дат., вин., твор., предл." },
+        { s: "«Я читаю книгу» — «книгу» qaysi kelishikda?", v: ["Именительный", "Родительный", "Винительный", "Дательный"], t: 2, i: "Nima o'qiyapman? — винительный: книга → книгу." },
+        { s: "«У меня есть...» dagi «меня» qaysi kelishik?", v: ["Родительный", "Дательный", "Творительный", "Именительный"], t: 0, i: "У + родительный: у меня, у тебя, у него." },
+        { s: "«Я живу в Ташкенте» — «Ташкенте» qaysi kelishik?", v: ["Винительный", "Предложный", "Дательный", "Родительный"], t: 1, i: "Qayerda? — в/на + предложный kelishik." },
+      ]},
+      { nom: "💬 Fikr bildirish", savollar: [
+        { s: "«Я считаю, что...» nimani bildiradi?", v: ["Men sanayapmanki", "Men hisoblaymanki / fikrimcha", "Men ko'rdimki", "Men eshitdimki"], t: 1, i: "Считать — sanamoq va hisoblamoq (fikr). Suhbatda juda ko'p." },
+        { s: "«По-моему» nimani bildiradi?", v: ["Mening uyimda", "Menimcha", "Men bo'yicha", "Menga"], t: 1, i: "По-моему — menimcha. Yana: на мой взгляд." },
+        { s: "«Согласен» nimani bildiradi?", v: ["Qarshiman", "Roziman", "Bilmayman", "Shubham bor"], t: 1, i: "Согласен (erkak) / согласна (ayol) — roziman." },
+        { s: "«Может быть» nimani bildiradi?", v: ["Bo'lishi kerak", "Balki", "Albatta", "Hech qachon"], t: 1, i: "Может быть — balki. Qisqasi: может." },
+      ]},
+      { nom: "💼 Ish va o'qish", savollar: [
+        { s: "«Собеседование» nimani bildiradi?", v: ["Yig'ilish", "Suhbat (intervyu)", "Imtihon", "Dars"], t: 1, i: "Ishga kirishdagi suhbat. Беседа — suhbat so'zidan." },
+        { s: "«Зарплата» nimani bildiradi?", v: ["Soliq", "Maosh", "Mukofot", "Qarz"], t: 1, i: "Зарплата = заработная плата — ish haqi." },
+        { s: "«Учиться» nimani bildiradi?", v: ["O'rgatmoq", "O'qimoq (ta'lim olmoq)", "Ishlamoq", "Dam olmoq"], t: 1, i: "Учиться — o'qimoq (universitetda). O'rgatmoq: учить кого-то." },
+        { s: "«Опыт работы» nimani bildiradi?", v: ["Ish joyi", "Ish tajribasi", "Ish vaqti", "Ish haqi"], t: 1, i: "Опыт — tajriba. Rezyumeda doim so'raladi." },
+      ]},
+      { nom: "🗯 Jonli iboralar", savollar: [
+        { s: "«Иметь в виду» nimani bildiradi?", v: ["Ko'rib turmoq", "Nazarda tutmoq", "Esda saqlamoq", "Ko'z tikmoq"], t: 1, i: "Что ты имеешь в виду? — nima demoqchisan?" },
+        { s: "«Короче» so'zlashuvda nimani bildiradi?", v: ["Kaltaroq", "Xullas / qisqasi", "Tezroq", "Ozroq"], t: 1, i: "Gapni boshlash/yakunlashda: «xullas»." },
+        { s: "«Ничего себе!» nimani bildiradi?", v: ["O'zimga hech narsa", "Voy-bo'y! / Qoyil!", "Menga baribir", "Hechqisi yo'q"], t: 1, i: "Hayrat undovi. So'zma-so'z tarjima qilinmaydi." },
+        { s: "«Ладно» nimani bildiradi?", v: ["Yo'q", "Xo'p / mayli", "Keyin", "To'xta"], t: 1, i: "Ладно — rozilik. Ну ладно — bo'pti, mayli." },
+      ]},
+    ],
+  },
+  B2: {
+    nom: "B2 — Yuqori daraja",
+    tavsif: "Shart mayli, sifatdosh, murakkab iboralar",
+    darslar: [
+      { nom: "🤔 Shart mayli (бы)", savollar: [
+        { s: "«Если бы у меня было время...» nimani bildiradi?", v: ["Vaqtim bo'lganda edi...", "Vaqtim bor", "Vaqtim bo'ladi", "Vaqt so'rayapman"], t: 0, i: "бы + o'tgan zamon = shart mayli (real bo'lmagan holat)." },
+        { s: "«Я бы хотел» nimani bildiradi?", v: ["Men xohlayman", "Men xohlar edim", "Men xohladim", "Men xohlamayman"], t: 1, i: "Muloyim istak: Я бы хотел кофе — kofe olsam devdim." },
+        { s: "«бы» yuklamasi qaysi zamon bilan ishlatiladi?", v: ["Hozirgi", "Kelasi", "O'tgan", "Istalgan"], t: 2, i: "Доим o'tgan zamon shakli bilan: сделал бы, пошёл бы." },
+        { s: "«На твоём месте я бы...» nimani bildiradi?", v: ["Sening joyingda o'tiribman", "Sening o'rningda men...", "Men senga joy beraman", "Joyingni almashtir"], t: 1, i: "Maslahat berishning klassik shakli." },
+      ]},
+      { nom: "📖 Sifatdosh va ravishdosh", savollar: [
+        { s: "«Читающий человек» nimani bildiradi?", v: ["O'qigan odam", "O'qiyotgan odam", "O'qituvchi", "Kitobxon"], t: 1, i: "-ющий — hozirgi zamon sifatdoshi: o'qiyotgan." },
+        { s: "«Прочитав книгу, я лёг спать» — «прочитав» nima?", v: ["Fe'l", "Ravishdosh (o'qib bo'lib)", "Sifatdosh", "Ot"], t: 1, i: "-в/-вши — ravishdosh: ishni bajarib bo'lib." },
+        { s: "«Сделанный» nimani bildiradi?", v: ["Qilayotgan", "Qilingan", "Qiladigan", "Qilmoqchi"], t: 1, i: "-нный — majhul sifatdosh: qilingan ish." },
+        { s: "«Говоря по-русски, я волнуюсь» — «говоря» nima?", v: ["Ravishdosh (gapira turib)", "Sifatdosh", "Ot", "Ravish"], t: 0, i: "-я — hozirgi zamon ravishdoshi: gapira turib." },
+      ]},
+      { nom: "🧩 Murakkab bog'lovchilar", savollar: [
+        { s: "«Несмотря на то, что...» nimani bildiradi?", v: ["...ga qarab", "...ga qaramay", "...dan keyin", "...dan oldin"], t: 1, i: "Несмотря на дождь — yomg'irga qaramay." },
+        { s: "«Дело в том, что...» nimani bildiradi?", v: ["Ish shundaki", "Gap shundaki...", "Muammo yo'q", "Ish tugadi"], t: 1, i: "Tushuntirishni boshlash uchun eng ko'p ishlatiladigan ibora." },
+        { s: "«В течение недели» nimani bildiradi?", v: ["Bir haftadan keyin", "Bir hafta davomida", "Har hafta", "O'tgan hafta"], t: 1, i: "В течение + род. kelishik — davomida." },
+        { s: "«Благодаря тебе» nimani bildiradi?", v: ["Senga rahmat aytib", "Sening tufayling / sharofating bilan", "Senga qaramay", "Sen uchun"], t: 1, i: "Благодаря — ijobiy sabab. Salbiy sabab: из-за." },
+      ]},
+      { nom: "😎 So'zlashuv uslubi (PRO)", savollar: [
+        { s: "«Да ладно!» hayrat bilan aytilsa nimani bildiradi?", v: ["Xo'p mayli", "Yo'g'-e! / Rostdanmi?!", "Bas qil", "Albatta"], t: 1, i: "Ohangga qarab ma'no o'zgaradi — hayratda: «yo'g'-e!»" },
+        { s: "«Понятия не имею» nimani bildiradi?", v: ["Tushuncham bor", "Umuman bilmayman", "Tushunmadim", "Bilishni xohlamayman"], t: 1, i: "Kuchli «bilmayman». Oddiysi: не знаю." },
+        { s: "«Как бы то ни было» nimani bildiradi?", v: ["Qanday bo'lmasin / nima bo'lganda ham", "Qanday bo'ldi?", "Hech qanday", "Balki bo'lar"], t: 0, i: "Kitobiy ibora: nima bo'lganda ham / baribir." },
+        { s: "«Честно говоря» nimani bildiradi?", v: ["Halol ishlab", "Ochig'ini aytganda", "Sekin gapirib", "Baland ovozda"], t: 1, i: "Честно говоря — ochig'ini aytganda. Yana: если честно." },
+      ]},
+    ],
+  },
+};
+
+/* ===== ILOVA LOGIKASI (yagona fayl) ===== */
+const tg = window.Telegram ? window.Telegram.WebApp : null;
+if (tg) { tg.ready(); tg.expand(); }
+
+/* Orqa fon: suzuvchi harflar (optimallashtirilgan canvas) */
+(function () {
+  const cv = document.getElementById("bg");
+  const cx = cv.getContext("2d");
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  const GLYPHS = ["А","Б","В","Д","Ж","И","К","Л","Н","П","С","У","Ф","Ш","Э","Ю","Я","★","✦","♪","❄"];
+  let W = 0, H = 0, items = [], running = true;
+  function make() {
+    return {
+      x: Math.random() * W, y: H + 60 * DPR,
+      s: (9 + Math.random() * 16) * DPR,
+      vy: (0.12 + Math.random() * 0.35) * DPR,
+      vx: (Math.random() - 0.5) * 0.15 * DPR,
+      a: 0.05 + Math.random() * 0.11,
+      g: GLYPHS[(Math.random() * GLYPHS.length) | 0],
+      r: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.005,
+      c: Math.random() > 0.5 ? "#8e7bff" : "#22d3ee",
+    };
+  }
+  function resize() {
+    W = cv.width = innerWidth * DPR; H = cv.height = innerHeight * DPR;
+    cv.style.width = innerWidth + "px"; cv.style.height = innerHeight + "px";
+    const n = Math.min(34, Math.round((innerWidth * innerHeight) / 24000));
+    items = Array.from({ length: n }, () => { const p = make(); p.y = Math.random() * H; return p; });
+  }
+  function tick() {
+    if (!running) return;
+    cx.clearRect(0, 0, W, H);
+    for (const p of items) {
+      p.y -= p.vy; p.x += p.vx; p.r += p.vr;
+      if (p.y < -50) Object.assign(p, make());
+      cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r);
+      cx.globalAlpha = p.a; cx.fillStyle = p.c; cx.font = p.s + "px sans-serif";
+      cx.fillText(p.g, 0, 0); cx.restore();
+    }
+    requestAnimationFrame(tick);
+  }
+  document.addEventListener("visibilitychange", () => {
+    running = !document.hidden; if (running) requestAnimationFrame(tick);
+  });
+  addEventListener("resize", resize, { passive: true });
+  resize(); tick();
+})();
+
+/* SVG ikonkalar (qo'lda chizilgan) */
+function svg(p) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + p + "</svg>"; }
+const ICON = {
+  book: svg('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'),
+  grad: svg('<path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>'),
+  rocket: svg('<path d="M4.5 16.5c-1.5 1.4-2 5-2 5s3.6-.5 5-2c.8-.8.8-2 0-2.9-.8-.8-2.2-.8-3-.1z"/><path d="M12 15l-3-3c.4-1.4 1-2.7 2-4a12.6 12.6 0 0 1 10.5-6c0 2.7-.9 7.4-6 10.6-1.3 1-2.7 1.6-4 2z"/>'),
+  crown: svg('<path d="M2 18h20L20 8l-5 4-3-7-3 7-5-4z"/>'),
+  lock: svg('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'),
+  user: svg('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/>'),
+  trophy: svg('<path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 5M17 6h3a3 3 0 0 1-3 5"/>'),
+  back: svg('<path d="m15 18-6-6 6-6"/>'),
+  flame: svg('<path d="M12 22c4.4 0 7-2.8 7-6.5 0-3.5-2.5-5.5-3.7-8.5-2 1.7-2.8 3.3-3.3 5-1-1-1.5-2.7-1.5-4.5C8 9.5 5 12 5 15.5 5 19.2 7.6 22 12 22z"/>'),
+  out: svg('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>'),
+};
+const LEVEL_ICON = { A1: "book", A2: "grad", B1: "rocket", B2: "crown" };
+
+/* Ma'lumotlarni saqlash: localStorage + Telegram CloudStorage */
+function readDB() { try { return JSON.parse(localStorage.getItem("rt_db")) || { users: {} }; } catch (e) { return { users: {} }; } }
+function writeDB(d) {
+  localStorage.setItem("rt_db", JSON.stringify(d));
+  if (tg && tg.CloudStorage) tg.CloudStorage.setItem("rt_db", JSON.stringify(d), function () {});
+}
+function hash(s) { let h = 9; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 387420489); return (h >>> 0).toString(36); }
+
+let db = readDB();
+let me = null;
+let quiz = null;
+const app = document.getElementById("app");
+
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem("rt_db", function (err, val) {
+  if (!err && val && !localStorage.getItem("rt_db")) { localStorage.setItem("rt_db", val); db = readDB(); }
+});
+
+/* Yordamchilar */
+function user() { return db.users[me]; }
+const XP_RANKS = [[1500, "🏆 PRO"], [800, "🥇 Usta"], [400, "🥈 Bilimdon"], [150, "🥉 O'rganuvchi"], [0, "🌱 Yangi boshlovchi"]];
+function rank(xp) { for (const r of XP_RANKS) if (xp >= r[0]) return r[1]; }
+function best(L, i) { const u = user(); return (u.progress[L] && u.progress[L][i]) || 0; }
+function levelDone(L) { return DATA[L].darslar.every((_, i) => best(L, i) >= PASS); }
+function levelOpen(L) { const idx = LEVELS.indexOf(L); return idx === 0 || levelDone(LEVELS[idx - 1]); }
+function lessonOpen(L, i) { return i === 0 ? levelOpen(L) : best(L, i - 1) >= PASS; }
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; const t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+
+function toast(msg) {
+  const t = document.createElement("div"); t.className = "toast"; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
+}
+function confetti() {
+  const colors = ["#8e7bff", "#22d3ee", "#34d399", "#fbbf24", "#f87171"];
+  for (let i = 0; i < 50; i++) {
+    const c = document.createElement("i"); c.className = "confetti";
+    c.style.left = Math.random() * 100 + "vw";
+    c.style.background = colors[i % colors.length];
+    c.style.animationDelay = Math.random() * 0.6 + "s";
+    document.body.appendChild(c); setTimeout(() => c.remove(), 3400);
+  }
+}
+
+/* Kirish / Ro'yxatdan o'tish */
+let authMode = "login";
+function setMode(m) { authMode = m; authScreen(); }
+function authScreen() {
+  const tgName = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "";
+  app.innerHTML = `<div class="center fade"><div class="logo">${ICON.rocket}</div><h1 class="title">Rus tili <span class="grad-txt">PRO</span></h1><p class="sub">A1 dan B2 gacha — o'ynab o'rganing 🎮</p><div class="glass form"><div class="tabs"><button class="tab ${authMode === "login" ? "on" : ""}" onclick="setMode('login')">Kirish</button><button class="tab ${authMode === "register" ? "on" : ""}" onclick="setMode('register')">Ro'yxatdan o'tish</button></div><input id="f-name" class="inp" placeholder="👤 Ism (login)" value="${authMode === "register" ? tgName : ""}" maxlength="20"><input id="f-pass" class="inp" type="password" placeholder="🔑 Parol" maxlength="30"><button class="btn grad" onclick="submitAuth()">${authMode === "login" ? "🚀 Kirish" : "✨ Boshlash"}</button></div></div>`;
+}
+function submitAuth() {
+  const name = document.getElementById("f-name").value.trim();
+  const pass = document.getElementById("f-pass").value;
+  if (name.length < 2) return toast("Ism kamida 2 harf bo'lsin");
+  if (pass.length < 4) return toast("Parol kamida 4 belgi bo'lsin");
+  if (authMode === "register") {
+    if (db.users[name]) return toast("Bu ism band — Kirish bo'limini tanlang");
+    db.users[name] = { pass: hash(pass), xp: 0, progress: {}, created: Date.now() };
+    writeDB(db); me = name; localStorage.setItem("rt_me", name);
+    confetti(); toast("Xush kelibsiz, " + name + "! 🎉"); home();
+  } else {
+    const u = db.users[name];
+    if (!u || u.pass !== hash(pass)) return toast("Ism yoki parol noto'g'ri 😕");
+    me = name; localStorage.setItem("rt_me", name); home();
+  }
+}
+function logout() { me = null; localStorage.removeItem("rt_me"); authScreen(); }
+
+/* Bosh menyu */
+function home() {
+  const u = user();
+  const cards = LEVELS.map(L => {
+    const d = DATA[L]; const open = levelOpen(L);
+    const done = d.darslar.filter((_, i) => best(L, i) >= PASS).length;
+    const pct = Math.round(done / d.darslar.length * 100);
+    const prev = LEVELS[LEVELS.indexOf(L) - 1];
+    return `<div class="lvl glass ${open ? "" : "locked"}" onclick="${open ? `openLevel('${L}')` : `toast('🔒 Avval ${prev} ni tugating!')`}"><div class="lvl-ic">${ICON[LEVEL_ICON[L]]}</div><div class="lvl-body"><b>${d.nom}</b><small>${d.tavsif}</small><div class="bar"><div class="fill" style="width:${pct}%"></div></div><small class="mut">${done}/${d.darslar.length} dars · ${pct}%</small></div>${open ? "" : `<div class="lock">${ICON.lock}</div>`}</div>`;
+  }).join("");
+  app.innerHTML = `<div class="fade"><div class="head glass"><div class="ava">${ICON.user}</div><div><b>${me}</b><br><small class="mut">${rank(u.xp)}</small></div><div class="xp">${ICON.flame}<b>${u.xp}</b> XP</div><button class="ghost" onclick="logout()">${ICON.out}</button></div><h2 class="sec">📚 Darajalar</h2>${cards}<p class="foot">✨ Har darsni ${PASS}%+ bilan tugatsangiz, keyingisi ochiladi</p></div>`;
+}
+
+/* Daraja: darslar ro'yxati */
+function openLevel(L) {
+  const d = DATA[L];
+  const rows = d.darslar.map((dars, i) => {
+    const open = lessonOpen(L, i); const b = best(L, i);
+    const stars = b >= 95 ? "⭐⭐⭐" : b >= 85 ? "⭐⭐" : b >= PASS ? "⭐" : "";
+    return `<div class="lesson glass ${open ? "" : "locked"}" onclick="${open ? `startLesson('${L}',${i})` : "toast('🔒 Oldingi darsni tugating!')"}"><div class="num ${b >= PASS ? "done" : ""}">${b >= PASS ? "✓" : i + 1}</div><div class="lvl-body"><b>${dars.nom}</b><small class="mut">${dars.savollar.length} savol ${b ? "· eng yaxshi: " + b + "% " + stars : ""}</small></div>${open ? "" : `<div class="lock">${ICON.lock}</div>`}</div>`;
+  }).join("");
+  app.innerHTML = `<div class="fade"><div class="head glass"><button class="ghost" onclick="home()">${ICON.back}</button><div><b>${d.nom}</b><br><small class="mut">${d.tavsif}</small></div></div>${rows}</div>`;
+}
+
+/* Test */
+function startLesson(L, i) {
+  quiz = { L: L, i: i, qs: shuffle(DATA[L].darslar[i].savollar.slice()), qi: 0, ok: 0 };
+  question();
+}
+function question() {
+  const q = quiz.qs[quiz.qi];
+  const opts = q.v.map((v, i) => `<button class="opt glass" onclick="answer(${i})">${v}</button>`).join("");
+  app.innerHTML = `<div class="fade"><div class="head glass"><button class="ghost" onclick="openLevel('${quiz.L}')">${ICON.back}</button><div style="flex:1"><div class="bar"><div class="fill" style="width:${quiz.qi / quiz.qs.length * 100}%"></div></div><small class="mut">${quiz.qi + 1}/${quiz.qs.length} · ✅ ${quiz.ok}</small></div></div><div class="qcard glass"><h3>${q.s}</h3></div><div id="opts">${opts}</div><div id="after"></div></div>`;
+}
+function answer(i) {
+  const q = quiz.qs[quiz.qi];
+  const btns = document.querySelectorAll(".opt");
+  btns.forEach(b => b.disabled = true);
+  btns[q.t].classList.add("ok");
+  if (i === q.t) { quiz.ok++; btns[i].classList.add("pop"); }
+  else { btns[i].classList.add("bad", "shake"); }
+  quiz.qi++;
+  const last = quiz.qi >= quiz.qs.length;
+  document.getElementById("after").innerHTML = `<div class="izoh glass fade">💡 ${q.i}</div><button class="btn grad fade" onclick="${last ? "finish()" : "question()"}">${last ? "🏁 Natija" : "➡️ Keyingi"}</button>`;
+}
+
+/* Natija + qulf ochish */
+function finish() {
+  const total = quiz.qs.length, pct = Math.round(quiz.ok / total * 100), passed = pct >= PASS;
+  const u = user(); const L = quiz.L, i = quiz.i;
+  const old = best(L, i);
+  if (!u.progress[L]) u.progress[L] = {};
+  if (pct > old) u.progress[L][i] = pct;
+  const gained = quiz.ok * 10 + (passed ? 20 : 0);
+  u.xp += gained; writeDB(db);
+  let unlockMsg = "";
+  if (passed) {
+    confetti();
+    if (i + 1 < DATA[L].darslar.length) unlockMsg = `🔓 Yangi dars ochildi: <b>${DATA[L].darslar[i + 1].nom}</b>`;
+    else {
+      const nxt = LEVELS[LEVELS.indexOf(L) + 1];
+      if (nxt && levelOpen(nxt)) unlockMsg = `🎉 <b>${DATA[nxt].nom}</b> darajasi ochildi!`;
+      else if (!nxt && levelDone(L)) unlockMsg = "🏆 Siz BARCHA darajalarni tugatdingiz!";
+    }
+  }
+  app.innerHTML = `<div class="center fade"><div class="logo ${passed ? "" : "sad"}">${passed ? ICON.trophy : ICON.book}</div><h1 class="title">${passed ? "Ajoyib!" : "Yana urinib ko'ring"}</h1><div class="pct grad-txt" id="pct">0%</div><p class="sub">✅ ${quiz.ok}/${total} to'g'ri · +${gained} XP</p>${unlockMsg ? `<div class="izoh glass">${unlockMsg}</div>` : ""}<button class="btn grad" onclick="startLesson('${L}',${i})">🔄 Qayta yechish</button><button class="btn" onclick="openLevel('${L}')">📚 Darslar</button><button class="btn" onclick="home()">🏠 Bosh menyu</button></div>`;
+  let n = 0; const el = document.getElementById("pct");
+  const timer = setInterval(() => { n += 2; if (n >= pct) { n = pct; clearInterval(timer); } el.textContent = n + "%"; }, 20);
+}
+
+/* Ishga tushirish */
+me = localStorage.getItem("rt_me");
+if (me && db.users[me]) home(); else { me = null; authScreen(); }
+</script>
 </body>
 </html>
